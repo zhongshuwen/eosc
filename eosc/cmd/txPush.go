@@ -12,7 +12,7 @@ import (
 	"regexp"
 	"strings"
 
-	eos "github.com/eoscanada/eos-go"
+	zsw "github.com/zhongshuwen/zswchain-go"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 )
@@ -43,15 +43,15 @@ is displayed.
 		chainID := gjson.GetBytes(cnt, "chain_id").String()
 		hexChainID, _ := hex.DecodeString(chainID)
 
-		var signedTx *eos.SignedTransaction
+		var signedTx *zsw.SignedTransaction
 		errorCheck("json unmarshal transaction", json.Unmarshal(cnt, &signedTx))
 
 		api := getAPI()
 
-		packedTx, err := signedTx.Pack(eos.CompressionNone)
+		packedTx, err := signedTx.Pack(zsw.CompressionNone)
 		errorCheck("packing transaction", err)
 
-		pushTransaction(context.Background(), api, packedTx, eos.SHA256Bytes(hexChainID))
+		pushTransaction(context.Background(), api, packedTx, zsw.SHA256Bytes(hexChainID))
 	},
 }
 

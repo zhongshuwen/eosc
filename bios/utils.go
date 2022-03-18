@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	eos "github.com/eoscanada/eos-go"
+	zsw "github.com/zhongshuwen/zswchain-go"
 	"gopkg.in/olivere/elastic.v3/backoff"
 )
 
@@ -40,10 +40,10 @@ func ScanSingleLine() (out string, err error) {
 }
 
 // AN is a shortcut to create an AccountName
-var AN = eos.AN
+var AN = zsw.AN
 
 // PN is a shortcut to create a PermissionName
-var PN = eos.PN
+var PN = zsw.PN
 
 func flipEndianness(in uint64) (out uint64) {
 	buf := []byte{0, 0, 0, 0, 0, 0, 0, 0}
@@ -70,8 +70,8 @@ func Retry(attempts int, sleep time.Duration, callback func() error) (err error)
 	return fmt.Errorf("after %d attempts, last error: %s", attempts, err)
 }
 
-func AccountToNodeID(acct eos.AccountName) int64 {
-	id, _ := eos.StringToName(string(acct))
+func AccountToNodeID(acct zsw.AccountName) int64 {
+	id, _ := zsw.StringToName(string(acct))
 	return int64(id)
 }
 

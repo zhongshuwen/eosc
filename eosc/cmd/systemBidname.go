@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/eoscanada/eos-go/system"
+	"github.com/zhongshuwen/zswchain-go/system"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +15,7 @@ var systemBidnameCmd = &cobra.Command{
 
 All fields are required. Example usage:
 
-    eosc system bidname your_account_name eos "10.0000 EOS"
+    eosc system bidname your_account_name zsw "10.0000 EOS"
 
 Please note you could be locking up your funds in the name bidding
 auction if you don't intend to go through and being the highest

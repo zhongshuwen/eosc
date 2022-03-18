@@ -8,10 +8,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/ecc"
-	"github.com/eoscanada/eosc/cli"
-	eosvault "github.com/eoscanada/eosc/vault"
+	"github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/ecc"
+	"github.com/zhongshuwen/eosc/cli"
+	eosvault "github.com/zhongshuwen/eosc/vault"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -63,9 +63,9 @@ func listen(v *eosvault.Vault) {
 			return
 		}
 
-		var tx *eos.SignedTransaction
+		var tx *zsw.SignedTransaction
 		var requiredKeys []ecc.PublicKey
-		var chainID eos.HexBytes
+		var chainID zsw.HexBytes
 
 		if len(inputs) != 3 {
 			http.Error(w, "invalid length of message, should be 3 parameters", 500)

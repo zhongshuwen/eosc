@@ -6,10 +6,10 @@ import (
 	"os"
 	"time"
 
-	eos "github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/msig"
-	"github.com/eoscanada/eos-go/system"
-	"github.com/eoscanada/eos-go/token"
+	zsw "github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/msig"
+	"github.com/zhongshuwen/zswchain-go/system"
+	"github.com/zhongshuwen/zswchain-go/token"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -56,14 +56,14 @@ MAKE SURE TO INSPECT THE GENERATED MULTISIG TRANSACTION BEFORE APPROVING IT.
 		if buyerPermText == "" {
 			buyerPermText = string(buyerAccount)
 		}
-		buyerPerm, err := eos.NewPermissionLevel(buyerPermText)
+		buyerPerm, err := zsw.NewPermissionLevel(buyerPermText)
 		errorCheck(`invalid "buyer-permission"`, err)
 
 		myPermText := viper.GetString("tools-sell-account-cmd-seller-permission")
 		if myPermText == "" {
 			myPermText = string(soldAccount)
 		}
-		myPerm, err := eos.NewPermissionLevel(myPermText)
+		myPerm, err := zsw.NewPermissionLevel(myPermText)
 		errorCheck(`invalid "seller-permission"`, err)
 
 		targetOwnerAuth, err := sellAccountFindAuthority(buyerAccountData, "owner")
@@ -74,11 +74,11 @@ MAKE SURE TO INSPECT THE GENERATED MULTISIG TRANSACTION BEFORE APPROVING IT.
 		infoResp, err := api.GetInfo(ctx)
 		errorCheck("couldn't get_info from chain", err)
 
-		tx := eos.NewTransaction([]*eos.Action{
-			system.NewUpdateAuth(soldAccount, eos.PermissionName("owner"), eos.PermissionName(""), targetOwnerAuth, eos.PermissionName("owner")),
-			system.NewUpdateAuth(soldAccount, eos.PermissionName("active"), eos.PermissionName("owner"), targetActiveAuth, eos.PermissionName("active")),
+		tx := zsw.NewTransaction([]*zsw.Action{
+			system.NewUpdateAuth(soldAccount, zsw.PermissionName("owner"), zsw.PermissionName(""), targetOwnerAuth, zsw.PermissionName("owner")),
+			system.NewUpdateAuth(soldAccount, zsw.PermissionName("active"), zsw.PermissionName("owner"), targetActiveAuth, zsw.PermissionName("active")),
 			token.NewTransfer(buyerAccount, beneficiaryAccount, saleAmount, memo),
-		}, &eos.TxOptions{HeadBlockID: infoResp.HeadBlockID})
+		}, &zsw.TxOptions{HeadBlockID: infoResp.HeadBlockID})
 		tx.SetExpiration(viper.GetDuration("tools-sell-account-cmd-sale-expiration"))
 
 		fmt.Println("Submitting `eosio.msig` proposal:")
@@ -88,8 +88,8 @@ MAKE SURE TO INSPECT THE GENERATED MULTISIG TRANSACTION BEFORE APPROVING IT.
 		fmt.Println("Review this proposal with:")
 		fmt.Printf("  eosc multisig review %s %s", soldAccount, proposalName)
 		fmt.Println("")
-		msigPermissions := []eos.PermissionLevel{buyerPerm, myPerm, eos.PermissionLevel{Actor: soldAccount, Permission: eos.PermissionName("owner")}}
-		pushEOSCActions(ctx, api, msig.NewPropose(soldAccount, eos.Name(proposalName), msigPermissions, tx))
+		msigPermissions := []zsw.PermissionLevel{buyerPerm, myPerm, zsw.PermissionLevel{Actor: soldAccount, Permission: zsw.PermissionName("owner")}}
+		pushEOSCActions(ctx, api, msig.NewPropose(soldAccount, zsw.Name(proposalName), msigPermissions, tx))
 
 	},
 }
@@ -104,11 +104,11 @@ func init() {
 	toolsSellAccountCmd.Flags().DurationP("sale-expiration", "", 1*time.Hour, "Expire proposed transaction after this amount of time (30m, 1h, etc..)")
 }
 
-func sellAccountFindAuthority(data *eos.AccountResp, targetPerm string) (eos.Authority, error) {
+func sellAccountFindAuthority(data *zsw.AccountResp, targetPerm string) (zsw.Authority, error) {
 	for _, perm := range data.Permissions {
 		if perm.PermName == targetPerm {
 			return perm.RequiredAuth, nil
 		}
 	}
-	return eos.Authority{}, fmt.Errorf("permission %q not found in account %q", targetPerm, data.AccountName)
+	return zsw.Authority{}, fmt.Errorf("permission %q not found in account %q", targetPerm, data.AccountName)
 }

@@ -5,8 +5,8 @@ package cmd
 import (
 	"context"
 
-	"github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/system"
+	"github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/system"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +23,7 @@ This undoes the action of updateauth. Please refer to the updateauth help for mo
 		permissionName := toName(args[1], "permission_name")
 
 		api := getAPI()
-		pushEOSCActions(context.Background(), api, system.NewDeleteAuth(account, eos.PermissionName(permissionName)))
+		pushEOSCActions(context.Background(), api, system.NewDeleteAuth(account, zsw.PermissionName(permissionName)))
 	},
 }
 

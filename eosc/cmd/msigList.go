@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	eos "github.com/eoscanada/eos-go"
+	zsw "github.com/zhongshuwen/zswchain-go"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +24,7 @@ var msigListCmd = &cobra.Command{
 
 		response, err := api.GetTableRows(
 			ctx,
-			eos.GetTableRowsRequest{
+			zsw.GetTableRowsRequest{
 				Code:  "eosio.msig",
 				Scope: string(proposer),
 				Table: "proposal",
@@ -57,7 +57,7 @@ var msigListCmd = &cobra.Command{
 
 		response, err = api.GetTableRows(
 			ctx,
-			eos.GetTableRowsRequest{
+			zsw.GetTableRowsRequest{
 				Code:  "eosio.msig",
 				Scope: string(proposer),
 				Table: "approvals",
@@ -85,13 +85,13 @@ var msigListCmd = &cobra.Command{
 }
 
 type proposalRow struct {
-	ProposalName eos.Name     `json:"proposal_name"`
-	Transaction  eos.HexBytes `json:"packed_transaction"`
+	ProposalName zsw.Name     `json:"proposal_name"`
+	Transaction  zsw.HexBytes `json:"packed_transaction"`
 }
 type approvalRow struct {
-	ProposalName       eos.Name              `json:"proposal_name"`
-	RequestedApprovals []eos.PermissionLevel `json:"requested_approvals"`
-	ProvidedApprovals  []eos.PermissionLevel `json:"provided_approvals"`
+	ProposalName       zsw.Name              `json:"proposal_name"`
+	RequestedApprovals []zsw.PermissionLevel `json:"requested_approvals"`
+	ProvidedApprovals  []zsw.PermissionLevel `json:"provided_approvals"`
 }
 
 func (a approvalRow) Show() {
@@ -103,7 +103,7 @@ func (a approvalRow) Show() {
 	fmt.Println("---------------------")
 }
 
-func formatAuths(perms []eos.PermissionLevel) string {
+func formatAuths(perms []zsw.PermissionLevel) string {
 	var out []string
 	for _, perm := range perms {
 		out = append(out, fmt.Sprintf("- %s@%s\n", perm.Actor, perm.Permission))

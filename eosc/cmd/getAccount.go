@@ -7,8 +7,8 @@ import (
 
 	"github.com/ryanuber/columnize"
 
-	eos "github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eosc/cli"
+	zsw "github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/eosc/cli"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -35,7 +35,7 @@ var getAccountCmd = &cobra.Command{
 	},
 }
 
-func printAccount(account *eos.AccountResp) {
+func printAccount(account *zsw.AccountResp) {
 	if account != nil {
 		// dereference this so we can safely mutate it to accomodate uninitialized symbols
 		act := *account

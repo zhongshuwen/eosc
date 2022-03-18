@@ -6,13 +6,13 @@ import (
 	"strconv"
 	"text/tabwriter"
 
-	eos "github.com/eoscanada/eos-go"
+	zsw "github.com/zhongshuwen/zswchain-go"
 	"github.com/ryanuber/columnize"
 )
 
 const indentPadding = "      "
 
-func FormatBasicAccountInfo(account *eos.AccountResp, config *columnize.Config) string {
+func FormatBasicAccountInfo(account *zsw.AccountResp, config *columnize.Config) string {
 	output := []string{
 		fmt.Sprintf("privileged: |%v", account.Privileged),
 		fmt.Sprintf("created at: |%v", account.Created),
@@ -25,7 +25,7 @@ func FormatBasicAccountInfo(account *eos.AccountResp, config *columnize.Config) 
 	return columnize.Format(output, config)
 }
 
-func FormatCurrencyStats(stats *eos.GetCurrencyStatsResp, config *columnize.Config) string {
+func FormatCurrencyStats(stats *zsw.GetCurrencyStatsResp, config *columnize.Config) string {
 	output := []string{
 		fmt.Sprintf("supply: |%v", prettifyAsset(stats.Supply)),
 		fmt.Sprintf("max. supply: |%v", prettifyAsset(stats.MaxSupply)),
@@ -35,11 +35,11 @@ func FormatCurrencyStats(stats *eos.GetCurrencyStatsResp, config *columnize.Conf
 	return columnize.Format(output, config)
 }
 
-func FormatPermissions(account *eos.AccountResp, config *columnize.Config) string {
-	output := formatNestedPermission([]string{"permissions:"}, account.Permissions, eos.PermissionName(""), "")
+func FormatPermissions(account *zsw.AccountResp, config *columnize.Config) string {
+	output := formatNestedPermission([]string{"permissions:"}, account.Permissions, zsw.PermissionName(""), "")
 	return columnize.Format(output, config)
 }
-func formatNestedPermission(in []string, permissions []eos.Permission, showChildsOf eos.PermissionName, indent string) (out []string) {
+func formatNestedPermission(in []string, permissions []zsw.Permission, showChildsOf zsw.PermissionName, indent string) (out []string) {
 	out = in
 	for _, perm := range permissions {
 		if perm.Parent != string(showChildsOf) {
@@ -73,12 +73,12 @@ func formatNestedPermission(in []string, permissions []eos.Permission, showChild
 				)
 			}
 		}
-		out = formatNestedPermission(out, permissions, eos.PermissionName(perm.PermName), indent+indentPadding)
+		out = formatNestedPermission(out, permissions, zsw.PermissionName(perm.PermName), indent+indentPadding)
 	}
 	return out
 }
 
-func FormatMemory(account *eos.AccountResp, config *columnize.Config) string {
+func FormatMemory(account *zsw.AccountResp, config *columnize.Config) string {
 	output := []string{
 		"memory:",
 		fmt.Sprintf("%squota: %s| used: %s",
@@ -91,7 +91,7 @@ func FormatMemory(account *eos.AccountResp, config *columnize.Config) string {
 	return columnize.Format(output, config)
 }
 
-func FormatNetworkBandwidth(account *eos.AccountResp, config *columnize.Config) string {
+func FormatNetworkBandwidth(account *zsw.AccountResp, config *columnize.Config) string {
 	delegatedNet := account.TotalResources.NetWeight.Sub(account.SelfDelegatedBandwidth.NetWeight)
 
 	output := []string{
@@ -112,7 +112,7 @@ func FormatNetworkBandwidth(account *eos.AccountResp, config *columnize.Config) 
 	return columnize.Format(output, config)
 }
 
-func FormatCPUBandwidth(account *eos.AccountResp, config *columnize.Config) string {
+func FormatCPUBandwidth(account *zsw.AccountResp, config *columnize.Config) string {
 	delegatedCPU := account.TotalResources.CPUWeight.Sub(account.SelfDelegatedBandwidth.CPUWeight)
 
 	output := []string{
@@ -133,13 +133,13 @@ func FormatCPUBandwidth(account *eos.AccountResp, config *columnize.Config) stri
 	return columnize.Format(output, config)
 }
 
-func FormatBalances(account *eos.AccountResp, config *columnize.Config) string {
+func FormatBalances(account *zsw.AccountResp, config *columnize.Config) string {
 	if account.CoreLiquidBalance.Symbol.Symbol != "" {
 		totalStaked := account.SelfDelegatedBandwidth.NetWeight.Add(account.SelfDelegatedBandwidth.CPUWeight)
 		if totalStaked.Symbol != account.CoreLiquidBalance.Symbol {
 			totalStaked.Symbol = account.CoreLiquidBalance.Symbol
 		}
-		totalUnstaking := eos.Asset{
+		totalUnstaking := zsw.Asset{
 			Amount: 0,
 			Symbol: account.CoreLiquidBalance.Symbol,
 		}
@@ -163,7 +163,7 @@ func FormatBalances(account *eos.AccountResp, config *columnize.Config) string {
 	}
 }
 
-func FormatProducers(account *eos.AccountResp, config *columnize.Config) string {
+func FormatProducers(account *zsw.AccountResp, config *columnize.Config) string {
 	accounts := prettifyAccounts(account.VoterInfo.Producers, account)
 	output := []string{
 		"voted for:",
@@ -172,7 +172,7 @@ func FormatProducers(account *eos.AccountResp, config *columnize.Config) string 
 	return columnize.Format(output, config)
 }
 
-func FormatVoterInfo(account *eos.AccountResp, config *columnize.Config) string {
+func FormatVoterInfo(account *zsw.AccountResp, config *columnize.Config) string {
 	proxy := "<none>"
 	if len(account.VoterInfo.Proxy) > 0 {
 		proxy = string(account.VoterInfo.Proxy)
@@ -238,14 +238,14 @@ func prettifyTime(micro int64) string {
 	return rightAlignColumnize(strconv.FormatFloat(value, 'f', precision, 64), unit)
 }
 
-func prettifyAsset(w eos.Asset) string {
+func prettifyAsset(w zsw.Asset) string {
 	const unit = 10000
 	formatting := fmt.Sprintf("%%.%df", w.Precision)
 	return rightAlignColumnize(fmt.Sprintf(formatting, float64(w.Amount)/float64(unit)), w.Symbol.Symbol)
 
 }
 
-func prettifyAccounts(accounts []eos.AccountName, account *eos.AccountResp) []string {
+func prettifyAccounts(accounts []zsw.AccountName, account *zsw.AccountResp) []string {
 	names := []string{}
 	if len(accounts) == 0 {
 		if len(account.VoterInfo.Proxy) > 0 {

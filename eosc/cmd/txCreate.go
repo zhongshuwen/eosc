@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"io"
 
-	eos "github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/system"
+	zsw "github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/system"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -33,17 +33,17 @@ var txCreateCmd = &cobra.Command{
 		errorCheck("[payload] is not valid JSON", err)
 
 		api := getAPI()
-		actionBinary, err := api.ABIJSONToBin(ctx, contract, eos.Name(action), dump)
+		actionBinary, err := api.ABIJSONToBin(ctx, contract, zsw.Name(action), dump)
 		errorCheck("unable to retrieve action binary from JSON via API", err)
 
-		actions := []*eos.Action{
-			&eos.Action{
+		actions := []*zsw.Action{
+			&zsw.Action{
 				Account:    contract,
 				Name:       action,
-				ActionData: eos.NewActionDataFromHexData([]byte(actionBinary)),
+				ActionData: zsw.NewActionDataFromHexData([]byte(actionBinary)),
 			}}
 
-		var contextFreeActions []*eos.Action
+		var contextFreeActions []*zsw.Action
 		if forceUnique {
 			contextFreeActions = append(contextFreeActions, newNonceAction())
 		}
@@ -52,11 +52,11 @@ var txCreateCmd = &cobra.Command{
 	},
 }
 
-func newNonceAction() *eos.Action {
-	return &eos.Action{
-		Account: eos.AN("eosio.null"),
-		Name:    eos.ActN("nonce"),
-		ActionData: eos.NewActionData(system.Nonce{
+func newNonceAction() *zsw.Action {
+	return &zsw.Action{
+		Account: zsw.AN("eosio.null"),
+		Name:    zsw.ActN("nonce"),
+		ActionData: zsw.NewActionData(system.Nonce{
 			Value: hex.EncodeToString(generateRandomNonce()),
 		}),
 	}

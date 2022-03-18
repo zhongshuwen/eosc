@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	eos "github.com/eoscanada/eos-go"
+	zsw "github.com/zhongshuwen/zswchain-go"
 	"github.com/spf13/cobra"
 )
 
@@ -18,7 +18,7 @@ var voteStatusCmd = &cobra.Command{
 
 		response, err := api.GetTableRows(
 			context.Background(),
-			eos.GetTableRowsRequest{
+			zsw.GetTableRowsRequest{
 				Code:       "eosio",
 				Scope:      "eosio",
 				Table:      "voters",
@@ -29,7 +29,7 @@ var voteStatusCmd = &cobra.Command{
 		)
 		errorCheck("get table row", err)
 
-		var voterInfos []eos.VoterInfo
+		var voterInfos []zsw.VoterInfo
 		err = response.JSONToStructs(&voterInfos)
 		errorCheck("reading voter_info", err)
 

@@ -5,8 +5,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/eoscanada/eosc/cli"
-	"github.com/eoscanada/eosc/vault"
+	"github.com/zhongshuwen/eosc/cli"
+	"github.com/zhongshuwen/eosc/vault"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

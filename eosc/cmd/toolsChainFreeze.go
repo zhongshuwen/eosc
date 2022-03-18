@@ -8,8 +8,8 @@ import (
 
 	"encoding/hex"
 
-	"github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/p2p"
+	"github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/p2p"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -49,7 +49,7 @@ var chainFreezeHandler = p2p.HandlerFunc(func(envelope *p2p.Envelope) {
 
 	p2pMsg := envelope.Packet.P2PMessage
 	switch m := p2pMsg.(type) {
-	case *eos.SignedBlock:
+	case *zsw.SignedBlock:
 		fmt.Printf("Receiving block %d sign from %s\n", m.BlockNumber(), m.Producer)
 
 		doExec := false

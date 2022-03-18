@@ -5,9 +5,9 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/eoscanada/eos-go/ecc"
-	"github.com/eoscanada/eosc/cli"
-	eosvault "github.com/eoscanada/eosc/vault"
+	"github.com/zhongshuwen/zswchain-go/ecc"
+	"github.com/zhongshuwen/eosc/cli"
+	eosvault "github.com/zhongshuwen/eosc/vault"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

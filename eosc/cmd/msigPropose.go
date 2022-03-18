@@ -11,8 +11,8 @@ import (
 	"sort"
 	"strings"
 
-	eos "github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/msig"
+	zsw "github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/msig"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -51,20 +51,20 @@ add accounts listed in the owner permissions of the different accounts.
 		cnt, err := ioutil.ReadFile(transactionFileName)
 		errorCheck("reading transaction file", err)
 
-		var tx *eos.Transaction
+		var tx *zsw.Transaction
 		err = json.Unmarshal(cnt, &tx)
 		errorCheck("parsing transaction file", err)
 
-		var requested []eos.PermissionLevel
+		var requested []zsw.PermissionLevel
 		if viper.GetBool("multisig-propose-cmd-request-producers") {
 			out, err := requestProducers(ctx, api)
 			errorCheck("recursing to get producers accounts", err)
 
 			for el := range out {
 				chunks := strings.Split(el, "@")
-				requested = append(requested, eos.PermissionLevel{
-					Actor:      eos.AccountName(chunks[0]),
-					Permission: eos.PermissionName(chunks[1]),
+				requested = append(requested, zsw.PermissionLevel{
+					Actor:      zsw.AccountName(chunks[0]),
+					Permission: zsw.PermissionName(chunks[1]),
 				})
 			}
 
@@ -85,12 +85,12 @@ add accounts listed in the owner permissions of the different accounts.
 				}
 			}
 
-			requested = []eos.PermissionLevel{}
+			requested = []zsw.PermissionLevel{}
 			for el := range out {
 				chunks := strings.Split(el, "@")
-				requested = append(requested, eos.PermissionLevel{
-					Actor:      eos.AccountName(chunks[0]),
-					Permission: eos.PermissionName(chunks[1]),
+				requested = append(requested, zsw.PermissionLevel{
+					Actor:      zsw.AccountName(chunks[0]),
+					Permission: zsw.PermissionName(chunks[1]),
 				})
 			}
 		}
@@ -113,12 +113,12 @@ add accounts listed in the owner permissions of the different accounts.
 	},
 }
 
-func getProducersTable(ctx context.Context, api *eos.API) (prods producers, err error) {
+func getProducersTable(ctx context.Context, api *zsw.API) (prods producers, err error) {
 	lowerBound := ""
 	for {
 		response, err := api.GetTableRows(
 			ctx,
-			eos.GetTableRowsRequest{
+			zsw.GetTableRowsRequest{
 				Scope:      "eosio",
 				Code:       "eosio",
 				Table:      "producers",
@@ -146,14 +146,14 @@ func getProducersTable(ctx context.Context, api *eos.API) (prods producers, err 
 		if len(rows) != 0 {
 			last := rows[len(rows)-1]
 			owner := last["owner"].(string)
-			val, _ := eos.StringToName(owner)
-			lowerBound = eos.NameToString(val + 1)
+			val, _ := zsw.StringToName(owner)
+			lowerBound = zsw.NameToString(val + 1)
 		}
 	}
 	return
 }
 
-func requestProducers(ctx context.Context, api *eos.API) (out map[string]bool, err error) {
+func requestProducers(ctx context.Context, api *zsw.API) (out map[string]bool, err error) {
 	producers, err := getProducersTable(ctx, api)
 	errorCheck("get producers table", err)
 
@@ -179,7 +179,7 @@ func requestProducers(ctx context.Context, api *eos.API) (out map[string]bool, e
 	return
 }
 
-func recurseAccounts(ctx context.Context, api *eos.API, in map[string]bool, account string, permission string, level, maxLevels int) (out map[string]bool, err error) {
+func recurseAccounts(ctx context.Context, api *zsw.API, in map[string]bool, account string, permission string, level, maxLevels int) (out map[string]bool, err error) {
 	out = in
 
 	newAcct := fmt.Sprintf("%s@%s", account, permission)
@@ -195,7 +195,7 @@ func recurseAccounts(ctx context.Context, api *eos.API, in map[string]bool, acco
 	}
 
 	//fmt.Println("Fetching account", account)
-	resp, err := api.GetAccount(ctx, eos.AccountName(account))
+	resp, err := api.GetAccount(ctx, zsw.AccountName(account))
 	if err != nil {
 		return nil, err
 	}
@@ -223,13 +223,13 @@ func recurseAccounts(ctx context.Context, api *eos.API, in map[string]bool, acco
 	return
 }
 
-func permissionByName(perms []eos.Permission, name string) eos.Permission {
+func permissionByName(perms []zsw.Permission, name string) zsw.Permission {
 	for _, perm := range perms {
 		if perm.PermName == name {
 			return perm
 		}
 	}
-	return eos.Permission{}
+	return zsw.Permission{}
 }
 
 func init() {

@@ -6,9 +6,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/system"
-	"github.com/eoscanada/eosc/cli"
+	"github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/system"
+	"github.com/zhongshuwen/eosc/cli"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -41,9 +41,9 @@ func systemNewaccountRun(cmd *cobra.Command, args []string) {
 	creator := toAccount(args[0], "creator")
 	newAccount := toAccount(args[1], "new account name")
 
-	var actions []*eos.Action
-	var ownerAuth *eos.Authority
-	var activeAuth *eos.Authority
+	var actions []*zsw.Action
+	var ownerAuth *zsw.Authority
+	var activeAuth *zsw.Authority
 	var err error
 
 	ownerAuth, err = cli.ParseShortFormAuth(args[2])

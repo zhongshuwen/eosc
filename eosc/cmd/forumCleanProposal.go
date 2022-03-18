@@ -6,7 +6,7 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/eoscanada/eos-go/forum"
+	"github.com/zhongshuwen/zswchain-go/forum"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

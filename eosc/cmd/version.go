@@ -13,7 +13,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Show the program version",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("https://github.com/eoscanada/eosc - eosc", Version)
+		fmt.Println("https://github.com/zhongshuwen/eosc - eosc", Version)
 	},
 }
 

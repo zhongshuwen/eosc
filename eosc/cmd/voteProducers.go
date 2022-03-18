@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sort"
 
-	eos "github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/system"
+	zsw "github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/system"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +21,7 @@ var voteProducersCmd = &cobra.Command{
 		producerStringNames := args[1:]
 		sort.Strings(producerStringNames)
 
-		var producerNames []eos.AccountName
+		var producerNames []zsw.AccountName
 		for _, producerString := range producerStringNames {
 			producerNames = append(producerNames, toAccount(producerString, "producer list"))
 		}

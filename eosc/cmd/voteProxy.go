@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/eoscanada/eos-go/system"
+	"github.com/zhongshuwen/zswchain-go/system"
 	"github.com/spf13/cobra"
 )
 

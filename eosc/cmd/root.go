@@ -30,7 +30,7 @@ The 'vault' acts as a keosd-compatible wallet (the one developed by
 Block.one), while allowing you to manage your keys, and unlock it from
 the command line.
 
-Source code is available at: https://github.com/eoscanada/eosc
+Source code is available at: https://github.com/zhongshuwen/eosc
 `,
 }
 

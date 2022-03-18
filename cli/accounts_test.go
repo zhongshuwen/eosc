@@ -3,8 +3,8 @@ package cli
 import (
 	"testing"
 
-	eos "github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/ecc"
+	zsw "github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/ecc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -16,32 +16,32 @@ func Test(t *testing.T) {
 	tests := []struct {
 		name   string
 		input  string
-		expect *eos.Authority
+		expect *zsw.Authority
 	}{
 		{
 			name:  "full",
 			input: "3=EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV+2,abourget@perm+3,bob",
-			expect: &eos.Authority{
+			expect: &zsw.Authority{
 				Threshold: uint32(3),
-				Waits:     []eos.WaitWeight{},
-				Accounts: []eos.PermissionLevelWeight{
-					eos.PermissionLevelWeight{
-						Permission: eos.PermissionLevel{
-							Actor:      eos.AccountName("abourget"),
-							Permission: eos.PermissionName("perm"),
+				Waits:     []zsw.WaitWeight{},
+				Accounts: []zsw.PermissionLevelWeight{
+					zsw.PermissionLevelWeight{
+						Permission: zsw.PermissionLevel{
+							Actor:      zsw.AccountName("abourget"),
+							Permission: zsw.PermissionName("perm"),
 						},
 						Weight: 3,
 					},
-					eos.PermissionLevelWeight{
-						Permission: eos.PermissionLevel{
-							Actor:      eos.AccountName("bob"),
-							Permission: eos.PermissionName("active"),
+					zsw.PermissionLevelWeight{
+						Permission: zsw.PermissionLevel{
+							Actor:      zsw.AccountName("bob"),
+							Permission: zsw.PermissionName("active"),
 						},
 						Weight: 1,
 					},
 				},
-				Keys: []eos.KeyWeight{
-					eos.KeyWeight{
+				Keys: []zsw.KeyWeight{
+					zsw.KeyWeight{
 						PublicKey: pubKey1,
 						Weight:    2,
 					},
@@ -51,27 +51,27 @@ func Test(t *testing.T) {
 		{
 			name:  "full of spaces",
 			input: "3  =  EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV  +  2  ,  abourget@perm + 3 , bob",
-			expect: &eos.Authority{
+			expect: &zsw.Authority{
 				Threshold: uint32(3),
-				Waits:     []eos.WaitWeight{},
-				Accounts: []eos.PermissionLevelWeight{
-					eos.PermissionLevelWeight{
-						Permission: eos.PermissionLevel{
-							Actor:      eos.AccountName("abourget"),
-							Permission: eos.PermissionName("perm"),
+				Waits:     []zsw.WaitWeight{},
+				Accounts: []zsw.PermissionLevelWeight{
+					zsw.PermissionLevelWeight{
+						Permission: zsw.PermissionLevel{
+							Actor:      zsw.AccountName("abourget"),
+							Permission: zsw.PermissionName("perm"),
 						},
 						Weight: 3,
 					},
-					eos.PermissionLevelWeight{
-						Permission: eos.PermissionLevel{
-							Actor:      eos.AccountName("bob"),
-							Permission: eos.PermissionName("active"),
+					zsw.PermissionLevelWeight{
+						Permission: zsw.PermissionLevel{
+							Actor:      zsw.AccountName("bob"),
+							Permission: zsw.PermissionName("active"),
 						},
 						Weight: 1,
 					},
 				},
-				Keys: []eos.KeyWeight{
-					eos.KeyWeight{
+				Keys: []zsw.KeyWeight{
+					zsw.KeyWeight{
 						PublicKey: pubKey1,
 						Weight:    2,
 					},
@@ -81,30 +81,30 @@ func Test(t *testing.T) {
 		{
 			name:  "single account",
 			input: "abourget",
-			expect: &eos.Authority{
+			expect: &zsw.Authority{
 				Threshold: uint32(1),
-				Waits:     []eos.WaitWeight{},
-				Accounts: []eos.PermissionLevelWeight{
-					eos.PermissionLevelWeight{
-						Permission: eos.PermissionLevel{
-							Actor:      eos.AccountName("abourget"),
-							Permission: eos.PermissionName("active"),
+				Waits:     []zsw.WaitWeight{},
+				Accounts: []zsw.PermissionLevelWeight{
+					zsw.PermissionLevelWeight{
+						Permission: zsw.PermissionLevel{
+							Actor:      zsw.AccountName("abourget"),
+							Permission: zsw.PermissionName("active"),
 						},
 						Weight: 1,
 					},
 				},
-				Keys: []eos.KeyWeight{},
+				Keys: []zsw.KeyWeight{},
 			},
 		},
 		{
 			name:  "single key",
 			input: "EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-			expect: &eos.Authority{
+			expect: &zsw.Authority{
 				Threshold: uint32(1),
-				Waits:     []eos.WaitWeight{},
-				Accounts:  []eos.PermissionLevelWeight{},
-				Keys: []eos.KeyWeight{
-					eos.KeyWeight{
+				Waits:     []zsw.WaitWeight{},
+				Accounts:  []zsw.PermissionLevelWeight{},
+				Keys: []zsw.KeyWeight{
+					zsw.KeyWeight{
 						PublicKey: pubKey1,
 						Weight:    1,
 					},
@@ -114,16 +114,16 @@ func Test(t *testing.T) {
 		{
 			name:  "sorted keys",
 			input: "EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV, EOS4xenzB8vAWjwHxnk8eGLkPumXDAEA1Sgq11U2muX3kJ8n7v2KA",
-			expect: &eos.Authority{
+			expect: &zsw.Authority{
 				Threshold: uint32(1),
-				Waits:     []eos.WaitWeight{},
-				Accounts:  []eos.PermissionLevelWeight{},
-				Keys: []eos.KeyWeight{
-					eos.KeyWeight{
+				Waits:     []zsw.WaitWeight{},
+				Accounts:  []zsw.PermissionLevelWeight{},
+				Keys: []zsw.KeyWeight{
+					zsw.KeyWeight{
 						PublicKey: pubKey2,
 						Weight:    1,
 					},
-					eos.KeyWeight{
+					zsw.KeyWeight{
 						PublicKey: pubKey1,
 						Weight:    1,
 					},
@@ -133,26 +133,26 @@ func Test(t *testing.T) {
 		{
 			name:  "sorted accounts",
 			input: "alex, bob",
-			expect: &eos.Authority{
+			expect: &zsw.Authority{
 				Threshold: uint32(1),
-				Waits:     []eos.WaitWeight{},
-				Accounts: []eos.PermissionLevelWeight{
-					eos.PermissionLevelWeight{
-						Permission: eos.PermissionLevel{
-							Actor:      eos.AccountName("alex"),
-							Permission: eos.PermissionName("active"),
+				Waits:     []zsw.WaitWeight{},
+				Accounts: []zsw.PermissionLevelWeight{
+					zsw.PermissionLevelWeight{
+						Permission: zsw.PermissionLevel{
+							Actor:      zsw.AccountName("alex"),
+							Permission: zsw.PermissionName("active"),
 						},
 						Weight: 1,
 					},
-					eos.PermissionLevelWeight{
-						Permission: eos.PermissionLevel{
-							Actor:      eos.AccountName("bob"),
-							Permission: eos.PermissionName("active"),
+					zsw.PermissionLevelWeight{
+						Permission: zsw.PermissionLevel{
+							Actor:      zsw.AccountName("bob"),
+							Permission: zsw.PermissionName("active"),
 						},
 						Weight: 1,
 					},
 				},
-				Keys: []eos.KeyWeight{},
+				Keys: []zsw.KeyWeight{},
 			},
 		},
 	}

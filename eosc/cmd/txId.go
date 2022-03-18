@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	eos "github.com/eoscanada/eos-go"
+	zsw "github.com/zhongshuwen/zswchain-go"
 	"github.com/spf13/cobra"
 )
 
@@ -22,10 +22,10 @@ var txIDCmd = &cobra.Command{
 		cnt, err := ioutil.ReadFile(filename)
 		errorCheck("reading file", err)
 
-		var stx *eos.SignedTransaction
+		var stx *zsw.SignedTransaction
 		errorCheck("parsing JSON content", json.Unmarshal(cnt, &stx))
 
-		ptx, err := stx.Pack(eos.CompressionNone)
+		ptx, err := stx.Pack(zsw.CompressionNone)
 		errorCheck("packing transaction", err)
 
 		ptxID, err := ptx.ID()

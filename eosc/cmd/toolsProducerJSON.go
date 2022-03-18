@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	eos "github.com/eoscanada/eos-go"
+	zsw "github.com/zhongshuwen/zswchain-go"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -34,17 +34,17 @@ Reference: https://github.com/greymass/producerjson
 		errorCheck("packing json more tightly", err)
 
 		type producerJSONSet struct {
-			Owner eos.AccountName `json:"owner"`
+			Owner zsw.AccountName `json:"owner"`
 			JSON  string          `json:"json"`
 		}
 
-		pushEOSCActions(context.Background(), api, &eos.Action{
-			Account: eos.AccountName(viper.GetString("tools-producerjson-cmd-target-contract")),
-			Name:    eos.ActionName("set"),
-			Authorization: []eos.PermissionLevel{
-				{Actor: producerAccount, Permission: eos.PermissionName("active")},
+		pushEOSCActions(context.Background(), api, &zsw.Action{
+			Account: zsw.AccountName(viper.GetString("tools-producerjson-cmd-target-contract")),
+			Name:    zsw.ActionName("set"),
+			Authorization: []zsw.PermissionLevel{
+				{Actor: producerAccount, Permission: zsw.PermissionName("active")},
 			},
-			ActionData: eos.NewActionData(producerJSONSet{
+			ActionData: zsw.NewActionData(producerJSONSet{
 				Owner: producerAccount,
 				JSON:  string(packedCnt),
 			}),

@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/eoscanada/eos-go"
+	"github.com/zhongshuwen/zswchain-go"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -21,7 +21,7 @@ var getTableCmd = &cobra.Command{
 
 		response, err := api.GetTableRows(
 			context.Background(),
-			eos.GetTableRowsRequest{
+			zsw.GetTableRowsRequest{
 				Code:       args[0],
 				Scope:      args[1],
 				Table:      args[2],

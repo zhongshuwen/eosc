@@ -4,7 +4,7 @@ require (
 	github.com/abourget/llerrgroup v0.0.0-20161118145731-75f536392d17
 	github.com/bronze1man/go-yaml2json v0.0.0-20150129175009-f6f64b738964
 	github.com/davecgh/go-spew v1.1.1
-	github.com/eoscanada/eos-go v0.9.1-0.20201203164508-746769b6612f
+	github.com/zhongshuwen/zswchain-go v0.9.1-0.20201203164508-746769b6612f
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pborman/uuid v0.0.0-20180122190007-c65b2f87fee3

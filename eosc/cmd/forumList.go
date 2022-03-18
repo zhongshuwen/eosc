@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	eos "github.com/eoscanada/eos-go"
+	zsw "github.com/zhongshuwen/zswchain-go"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -22,13 +22,13 @@ var forumListCmd = &cobra.Command{
 		targetAccount := toAccount(viper.GetString("forum-cmd-target-contract"), "--target-contract")
 
 		proposerStr := viper.GetString("forum-list-cmd-from-proposer")
-		var proposer eos.AccountName
+		var proposer zsw.AccountName
 
 		var err error
-		var resp *eos.GetTableRowsResp
+		var resp *zsw.GetTableRowsResp
 		if proposerStr != "" {
 			proposer = toAccount(proposerStr, "--from-proposer")
-			resp, err = api.GetTableRows(ctx, eos.GetTableRowsRequest{
+			resp, err = api.GetTableRows(ctx, zsw.GetTableRowsRequest{
 				Code:       string(targetAccount),
 				Scope:      string(targetAccount),
 				Table:      string("proposal"),
@@ -42,7 +42,7 @@ var forumListCmd = &cobra.Command{
 				errorCheck(fmt.Sprintf("unable to get list of proposals from proposer %q", proposer), err)
 			}
 		} else {
-			resp, err = api.GetTableRows(ctx, eos.GetTableRowsRequest{
+			resp, err = api.GetTableRows(ctx, zsw.GetTableRowsRequest{
 				Code:  string(targetAccount),
 				Scope: string(targetAccount),
 				Table: string("proposal"),
@@ -56,12 +56,12 @@ var forumListCmd = &cobra.Command{
 		}
 
 		var proposals []struct {
-			ProposalName eos.Name        `json:"proposal_name"`
-			Proposer     eos.AccountName `json:"proposer"`
+			ProposalName zsw.Name        `json:"proposal_name"`
+			Proposer     zsw.AccountName `json:"proposer"`
 			Title        string          `json:"title"`
 			ProposalJSON string          `json:"proposal_json"`
-			CreatedAt    eos.JSONTime    `json:"created_at"`
-			ExpiresAt    eos.JSONTime    `json:"expires_at"`
+			CreatedAt    zsw.JSONTime    `json:"created_at"`
+			ExpiresAt    zsw.JSONTime    `json:"expires_at"`
 		}
 		err = resp.JSONToStructs(&proposals)
 		errorCheck("reading proposal list", err)

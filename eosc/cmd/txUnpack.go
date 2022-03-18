@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	eos "github.com/eoscanada/eos-go"
+	zsw "github.com/zhongshuwen/zswchain-go"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +20,7 @@ var txUnpackCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		var tx *eos.SignedTransaction
+		var tx *zsw.SignedTransaction
 		rawTx, err := transactionFromFileOrCLI(args[0], &tx)
 		errorCheck("reading transaction", err)
 
@@ -40,7 +40,7 @@ var txUnpackCmd = &cobra.Command{
 	},
 }
 
-func txUnpackAction(ctx context.Context, api *eos.API, act *eos.Action) error {
+func txUnpackAction(ctx context.Context, api *zsw.API, act *zsw.Action) error {
 	hexBytes, ok := act.Data.(string)
 	if !ok {
 		return fmt.Errorf("action data expected to be hex bytes as string, was %T", act.Data)
@@ -50,7 +50,7 @@ func txUnpackAction(ctx context.Context, api *eos.API, act *eos.Action) error {
 		return fmt.Errorf("invalid hex bytes stream: %s", err)
 	}
 
-	data, err := api.ABIBinToJSON(ctx, act.Account, eos.Name(act.Name), bytes)
+	data, err := api.ABIBinToJSON(ctx, act.Account, zsw.Name(act.Name), bytes)
 	if err != nil {
 		return fmt.Errorf("chain abi_bin_to_json: %s", err)
 	}

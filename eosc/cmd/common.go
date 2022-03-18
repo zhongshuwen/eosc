@@ -14,11 +14,11 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/ecc"
-	"github.com/eoscanada/eos-go/sudo"
-	"github.com/eoscanada/eosc/cli"
-	eosvault "github.com/eoscanada/eosc/vault"
+	"github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/ecc"
+	"github.com/zhongshuwen/zswchain-go/sudo"
+	"github.com/zhongshuwen/eosc/cli"
+	eosvault "github.com/zhongshuwen/eosc/vault"
 	"github.com/spf13/viper"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -87,7 +87,7 @@ func setupWallet() (*eosvault.Vault, error) {
 	return vault, nil
 }
 
-func attachWallet(api *eos.API) {
+func attachWallet(api *zsw.API) {
 	walletURLs := viper.GetStringSlice("global-wallet-url")
 	if len(walletURLs) == 0 {
 		vault, err := setupWallet()
@@ -97,7 +97,7 @@ func attachWallet(api *eos.API) {
 	} else {
 		if len(walletURLs) == 1 {
 			// If a `walletURLs` has a Username in the path, use instead of `default`.
-			api.SetSigner(eos.NewWalletSigner(eos.New(walletURLs[0]), "default"))
+			api.SetSigner(zsw.NewWalletSigner(zsw.New(walletURLs[0]), "default"))
 		} else {
 			fmt.Println("Multi-signer not yet implemented.  Please choose only one `--wallet-url`")
 			os.Exit(1)
@@ -105,9 +105,9 @@ func attachWallet(api *eos.API) {
 	}
 }
 
-func getAPI() *eos.API {
+func getAPI() *zsw.API {
 	httpHeaders := viper.GetStringSlice("global-http-header")
-	api := eos.New(sanitizeAPIURL(viper.GetString("global-api-url")))
+	api := zsw.New(sanitizeAPIURL(viper.GetString("global-api-url")))
 
 	for i := 0; i < 25; i++ {
 		if val := os.Getenv(fmt.Sprintf("EOSC_GLOBAL_HTTP_HEADER_%d", i)); val != "" {
@@ -132,9 +132,9 @@ func getAPI() *eos.API {
 }
 
 var coreSymbolIsCached bool
-var coreSymbol eos.Symbol
+var coreSymbol zsw.Symbol
 
-func getCoreSymbol() eos.Symbol {
+func getCoreSymbol() zsw.Symbol {
 	if coreSymbolIsCached {
 		return coreSymbol
 	}
@@ -145,7 +145,7 @@ func getCoreSymbol() eos.Symbol {
 	// symbol from global flag and reporting the error.
 	coreSymbolIsCached = true
 	if err := initCoreSymbol(); err != nil {
-		coreSymbol = eos.EOSSymbol
+		coreSymbol = zsw.EOSSymbol
 		zlog.Debug(
 			"unable to retrieve core symbol from API, falling back to default",
 			zap.Error(err),
@@ -157,7 +157,7 @@ func getCoreSymbol() eos.Symbol {
 }
 
 func initCoreSymbol() error {
-	resp, err := getAPI().GetTableRows(context.Background(), eos.GetTableRowsRequest{
+	resp, err := getAPI().GetTableRows(context.Background(), zsw.GetTableRowsRequest{
 		Code:  "eosio",
 		Scope: "eosio",
 		Table: "rammarket",
@@ -173,7 +173,7 @@ func initCoreSymbol() error {
 		return errors.New("table has not expected format")
 	}
 
-	asset, err := eos.NewAsset(result.String())
+	asset, err := zsw.NewAsset(result.String())
 	if !result.Exists() {
 		return fmt.Errorf("quote balance asset %q is not valid: %s", result.String(), err)
 	}
@@ -202,11 +202,11 @@ func exitWitMessage(message string) {
 	os.Exit(1)
 }
 
-func permissionToPermissionLevel(in string) (out eos.PermissionLevel, err error) {
-	return eos.NewPermissionLevel(in)
+func permissionToPermissionLevel(in string) (out zsw.PermissionLevel, err error) {
+	return zsw.NewPermissionLevel(in)
 }
 
-func permissionsToPermissionLevels(in []string) (out []eos.PermissionLevel, err error) {
+func permissionsToPermissionLevels(in []string) (out []zsw.PermissionLevel, err error) {
 	// loop all parameters
 	for _, singleArg := range in {
 
@@ -224,11 +224,11 @@ func permissionsToPermissionLevels(in []string) (out []eos.PermissionLevel, err 
 	return
 }
 
-func pushEOSCActions(ctx context.Context, api *eos.API, actions ...*eos.Action) {
+func pushEOSCActions(ctx context.Context, api *zsw.API, actions ...*zsw.Action) {
 	pushEOSCActionsAndContextFreeActions(ctx, api, nil, actions)
 }
 
-func pushEOSCActionsAndContextFreeActions(ctx context.Context, api *eos.API, contextFreeActions []*eos.Action, actions []*eos.Action) {
+func pushEOSCActionsAndContextFreeActions(ctx context.Context, api *zsw.API, contextFreeActions []*zsw.Action, actions []*zsw.Action) {
 	for _, act := range contextFreeActions {
 		act.Authorization = nil
 	}
@@ -243,7 +243,7 @@ func pushEOSCActionsAndContextFreeActions(ctx context.Context, api *eos.API, con
 		}
 	}
 
-	opts := &eos.TxOptions{}
+	opts := &zsw.TxOptions{}
 
 	if chainID := viper.GetString("global-offline-chain-id"); chainID != "" {
 		opts.ChainID = toSHA256Bytes(chainID, "--offline-chain-id")
@@ -262,7 +262,7 @@ func pushEOSCActionsAndContextFreeActions(ctx context.Context, api *eos.API, con
 		os.Exit(1)
 	}
 
-	tx := eos.NewTransaction(actions, opts)
+	tx := zsw.NewTransaction(actions, opts)
 	if len(contextFreeActions) > 0 {
 		tx.ContextFreeActions = contextFreeActions
 	}
@@ -274,14 +274,14 @@ func pushEOSCActionsAndContextFreeActions(ctx context.Context, api *eos.API, con
 	optionallyPushTransaction(ctx, signedTx, packedTx, opts.ChainID, api)
 }
 
-func optionallySudoWrap(tx *eos.Transaction, opts *eos.TxOptions) *eos.Transaction {
+func optionallySudoWrap(tx *zsw.Transaction, opts *zsw.TxOptions) *zsw.Transaction {
 	if viper.GetBool("global-sudo-wrap") {
-		return eos.NewTransaction([]*eos.Action{sudo.NewExec(eos.AccountName("eosio.wrap"), *tx)}, opts)
+		return zsw.NewTransaction([]*zsw.Action{sudo.NewExec(zsw.AccountName("eosio.wrap"), *tx)}, opts)
 	}
 	return tx
 }
 
-func optionallySignTransaction(ctx context.Context, tx *eos.Transaction, chainID eos.SHA256Bytes, api *eos.API, resetExpiration bool) (signedTx *eos.SignedTransaction, packedTx *eos.PackedTransaction) {
+func optionallySignTransaction(ctx context.Context, tx *zsw.Transaction, chainID zsw.SHA256Bytes, api *zsw.API, resetExpiration bool) (signedTx *zsw.SignedTransaction, packedTx *zsw.PackedTransaction) {
 	if !viper.GetBool("global-skip-sign") {
 		textSignKeys := viper.GetStringSlice("global-offline-sign-key")
 		if len(textSignKeys) > 0 {
@@ -292,7 +292,7 @@ func optionallySignTransaction(ctx context.Context, tx *eos.Transaction, chainID
 
 				signKeys = append(signKeys, pubKey)
 			}
-			api.SetCustomGetRequiredKeys(func(ctx context.Context, tx *eos.Transaction) ([]ecc.PublicKey, error) {
+			api.SetCustomGetRequiredKeys(func(ctx context.Context, tx *zsw.Transaction) ([]ecc.PublicKey, error) {
 				return signKeys, nil
 			})
 		}
@@ -304,17 +304,17 @@ func optionallySignTransaction(ctx context.Context, tx *eos.Transaction, chainID
 		}
 
 		var err error
-		signedTx, packedTx, err = api.SignTransaction(ctx, tx, chainID, eos.CompressionNone)
+		signedTx, packedTx, err = api.SignTransaction(ctx, tx, chainID, zsw.CompressionNone)
 		errorCheck("signing transaction", err)
 	} else {
 		tx.SetExpiration(time.Duration(viper.GetInt("global-expiration")) * time.Second)
 
-		signedTx = eos.NewSignedTransaction(tx)
+		signedTx = zsw.NewSignedTransaction(tx)
 	}
 	return signedTx, packedTx
 }
 
-func optionallyPushTransaction(ctx context.Context, signedTx *eos.SignedTransaction, packedTx *eos.PackedTransaction, chainID eos.SHA256Bytes, api *eos.API) {
+func optionallyPushTransaction(ctx context.Context, signedTx *zsw.SignedTransaction, packedTx *zsw.PackedTransaction, chainID zsw.SHA256Bytes, api *zsw.API) {
 	writeTrx := viper.GetString("global-write-transaction")
 
 	if writeTrx != "" {
@@ -343,10 +343,10 @@ func optionallyPushTransaction(ctx context.Context, signedTx *eos.SignedTransact
 	}
 }
 
-func pushTransaction(ctx context.Context, api *eos.API, packedTx *eos.PackedTransaction, chainID eos.SHA256Bytes) {
+func pushTransaction(ctx context.Context, api *zsw.API, packedTx *zsw.PackedTransaction, chainID zsw.SHA256Bytes) {
 	resp, err := api.PushTransaction(ctx, packedTx)
 	if err != nil {
-		if typedErr, ok := err.(eos.APIError); ok {
+		if typedErr, ok := err.(zsw.APIError); ok {
 			printError(typedErr)
 		}
 		errorCheck("pushing transaction", err)
@@ -360,7 +360,7 @@ func pushTransaction(ctx context.Context, api *eos.API, packedTx *eos.PackedTran
 	}
 }
 
-func transactionURL(chainID eos.SHA256Bytes, trxID string) string {
+func transactionURL(chainID zsw.SHA256Bytes, trxID string) string {
 	hexChain := hex.EncodeToString(chainID)
 	switch hexChain {
 	case "aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906":
@@ -374,7 +374,7 @@ func transactionURL(chainID eos.SHA256Bytes, trxID string) string {
 	return trxID
 }
 
-func blockURL(chainID eos.SHA256Bytes, blockID string) string {
+func blockURL(chainID zsw.SHA256Bytes, blockID string) string {
 	hexChain := hex.EncodeToString(chainID)
 	switch hexChain {
 	case "aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906":
@@ -388,50 +388,50 @@ func blockURL(chainID eos.SHA256Bytes, blockID string) string {
 	return blockID
 }
 
-func printError(err eos.APIError) {
+func printError(err zsw.APIError) {
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
 	enc.Encode(err)
 }
 
-func toAccount(in, field string) eos.AccountName {
+func toAccount(in, field string) zsw.AccountName {
 	acct, err := cli.ToAccountName(in)
 	errorCheck(fmt.Sprintf("invalid account format for %q", field), err)
 
 	return acct
 }
 
-func toAsset(symbol eos.Symbol, in, field string) eos.Asset {
-	asset, err := eos.NewFixedSymbolAssetFromString(symbol, in)
+func toAsset(symbol zsw.Symbol, in, field string) zsw.Asset {
+	asset, err := zsw.NewFixedSymbolAssetFromString(symbol, in)
 	errorCheck(fmt.Sprintf("invalid %q value %q", field, in), err)
 
 	return asset
 }
 
-func toAssetWithDefaultCoreSymbol(in, field string) eos.Asset {
+func toAssetWithDefaultCoreSymbol(in, field string) zsw.Asset {
 	if len(strings.Split(in, " ")) == 1 {
 		return toCoreAsset(in, field)
 	}
 
-	asset, err := eos.NewAssetFromString(in)
+	asset, err := zsw.NewAssetFromString(in)
 	errorCheck(fmt.Sprintf("invalid asset value %q for %q", in, field), err)
 
 	return asset
 }
 
-func toCoreAsset(in, field string) eos.Asset {
+func toCoreAsset(in, field string) zsw.Asset {
 	return toAsset(getCoreSymbol(), in, field)
 }
 
-func toEOSAsset(in, field string) eos.Asset {
-	return toAsset(eos.EOSSymbol, in, field)
+func toEOSAsset(in, field string) zsw.Asset {
+	return toAsset(zsw.EOSSymbol, in, field)
 }
 
-func toREXAsset(in, field string) eos.Asset {
-	return toAsset(eos.REXSymbol, in, field)
+func toREXAsset(in, field string) zsw.Asset {
+	return toAsset(zsw.REXSymbol, in, field)
 }
 
-func toName(in, field string) eos.Name {
+func toName(in, field string) zsw.Name {
 	name, err := cli.ToName(in)
 	if err != nil {
 		errorCheck(fmt.Sprintf("invalid name format for %q", field), err)
@@ -440,7 +440,7 @@ func toName(in, field string) eos.Name {
 	return name
 }
 
-func toPermissionLevel(in, field string) eos.PermissionLevel {
+func toPermissionLevel(in, field string) zsw.PermissionLevel {
 	perm, err := permissionToPermissionLevel(in)
 	if err != nil {
 		errorCheck(fmt.Sprintf("invalid permission level for %q", field), err)
@@ -448,8 +448,8 @@ func toPermissionLevel(in, field string) eos.PermissionLevel {
 	return perm
 }
 
-func toActionName(in, field string) eos.ActionName {
-	return eos.ActionName(toName(in, field))
+func toActionName(in, field string) zsw.ActionName {
+	return zsw.ActionName(toName(in, field))
 }
 
 func toUint16(in, field string) uint16 {
@@ -466,7 +466,7 @@ func toUint64(in, field string) uint64 {
 	return value
 }
 
-func toSHA256Bytes(in, field string) eos.SHA256Bytes {
+func toSHA256Bytes(in, field string) zsw.SHA256Bytes {
 	if len(in) != 64 {
 		errorCheck(fmt.Sprintf("%q invalid", field), errors.New("should be 64 hexadecimal characters"))
 	}
@@ -477,7 +477,7 @@ func toSHA256Bytes(in, field string) eos.SHA256Bytes {
 	return bytes
 }
 
-func isStubABI(abi eos.ABI) bool {
+func isStubABI(abi zsw.ABI) bool {
 	return abi.Version == "" &&
 		abi.Actions == nil &&
 		abi.ErrorMessages == nil &&

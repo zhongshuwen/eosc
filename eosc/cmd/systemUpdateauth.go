@@ -6,9 +6,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/system"
-	"github.com/eoscanada/eosc/cli"
+	"github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/system"
+	"github.com/zhongshuwen/eosc/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -28,7 +28,7 @@ The [authority] field is expressed using this short-form syntax:
 		account := toAccount(args[0], "account")
 		permissionName := toName(args[1], "permission_name")
 
-		var parent eos.Name
+		var parent zsw.Name
 		if args[2] != "" {
 			parent = toName(args[2], "parent permission")
 		}
@@ -51,16 +51,16 @@ The [authority] field is expressed using this short-form syntax:
 			api,
 			system.NewUpdateAuth(
 				account,
-				eos.PermissionName(permissionName),
-				eos.PermissionName(parent),
+				zsw.PermissionName(permissionName),
+				zsw.PermissionName(parent),
 				*auth,
-				eos.PermissionName(updateAuthActionPermission),
+				zsw.PermissionName(updateAuthActionPermission),
 			),
 		)
 	},
 }
 
-func ValidateAuth(auth *eos.Authority) error {
+func ValidateAuth(auth *zsw.Authority) error {
 	for idx, account := range auth.Accounts {
 		if len(account.Permission.Permission) == 0 {
 			return fmt.Errorf("account #%d missing permission", idx)

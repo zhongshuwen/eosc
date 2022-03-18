@@ -11,15 +11,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/ecc"
+	"github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/ecc"
 )
 
 type BIOS struct {
 	Log       *Logger
 	CachePath string
 
-	TargetNetAPI       *eos.API
+	TargetNetAPI       *zsw.API
 	Snapshot           Snapshot
 	BootSequenceFile   string
 	BootSequence       *BootSeq
@@ -33,7 +33,7 @@ type BIOS struct {
 	EphemeralPublicKey  ecc.PublicKey
 }
 
-func NewBIOS(logger *Logger, cachePath string, targetAPI *eos.API) *BIOS {
+func NewBIOS(logger *Logger, cachePath string, targetAPI *zsw.API) *BIOS {
 	b := &BIOS{
 		CachePath:    cachePath,
 		TargetNetAPI: targetAPI,
@@ -83,7 +83,7 @@ func (b *BIOS) Boot() error {
 	// Don't get `get_required_keys` from the blockchain, this adds
 	// latency.. and we KNOW the key you're going to ask :) It's the
 	// only key we're going to sign with anyway..
-	b.TargetNetAPI.SetCustomGetRequiredKeys(func(ctx context.Context, tx *eos.Transaction) (out []ecc.PublicKey, err error) {
+	b.TargetNetAPI.SetCustomGetRequiredKeys(func(ctx context.Context, tx *zsw.Transaction) (out []ecc.PublicKey, err error) {
 		return append(out, pubKey), nil
 	})
 
@@ -109,7 +109,7 @@ func (b *BIOS) Boot() error {
 	}
 	b.Log.Println("")
 
-	//eos.Debug = true
+	//zsw.Debug = true
 
 	for _, step := range b.BootSequence.BootSequence {
 		b.Log.Printf("%s  [%s] ", step.Label, step.Op)
@@ -209,7 +209,7 @@ func (b *BIOS) logEphemeralKey(tag string) {
 
 func (b *BIOS) RunChainValidation() (bool, error) {
 	bootSeqMap := ActionMap{}
-	bootSeq := []*eos.Action{}
+	bootSeq := []*zsw.Action{}
 
 	for _, step := range b.BootSequence.BootSequence {
 		acts, err := step.Data.Actions(b)
@@ -223,7 +223,7 @@ func (b *BIOS) RunChainValidation() (bool, error) {
 			}
 
 			stepAction.SetToServer(true)
-			data, err := eos.MarshalBinary(stepAction)
+			data, err := zsw.MarshalBinary(stepAction)
 			if err != nil {
 				return false, fmt.Errorf("validating: binary marshalling: %s", err)
 			}
@@ -293,16 +293,16 @@ func (b *BIOS) writeAllActionsToDisk() error {
 	return nil
 }
 
-type ActionMap map[string]*eos.Action
+type ActionMap map[string]*zsw.Action
 
 type ValidationError struct {
 	Err               error
 	BlockNumber       int
-	Action            *eos.Action
+	Action            *zsw.Action
 	RawAction         []byte
 	Index             int
 	ActionHexData     string
-	PackedTransaction *eos.PackedTransaction
+	PackedTransaction *zsw.PackedTransaction
 }
 
 func (e ValidationError) Error() string {
@@ -359,7 +359,7 @@ func (b *BIOS) pingTargetNetwork() {
 	b.Log.Println(" touchdown!")
 }
 
-func (b *BIOS) validateTargetNetwork(bootSeqMap ActionMap, bootSeq []*eos.Action) (err error) {
+func (b *BIOS) validateTargetNetwork(bootSeqMap ActionMap, bootSeq []*zsw.Action) (err error) {
 	expectedActionCount := len(bootSeq)
 	validationErrors := make([]error, 0)
 
@@ -419,7 +419,7 @@ func (b *BIOS) validateTargetNetwork(bootSeqMap ActionMap, bootSeq []*eos.Action
 
 			for _, act := range unpacked.Actions {
 				act.SetToServer(false)
-				data, err := eos.MarshalBinary(act)
+				data, err := zsw.MarshalBinary(act)
 				if err != nil {
 					b.Log.Printf("Error marshalling an action: %s\n", err)
 					validationErrors = append(validationErrors, ValidationError{
@@ -469,7 +469,7 @@ func (b *BIOS) validateTargetNetwork(bootSeqMap ActionMap, bootSeq []*eos.Action
 	return nil
 }
 
-func (b *BIOS) flushMissingActions(seenMap map[string]bool, bootSeq []*eos.Action) {
+func (b *BIOS) flushMissingActions(seenMap map[string]bool, bootSeq []*zsw.Action) {
 	fl, err := os.Create("missing_actions.jsonl")
 	if err != nil {
 		fmt.Println("Couldn't write to `missing_actions.jsonl`:", err)
@@ -482,7 +482,7 @@ func (b *BIOS) flushMissingActions(seenMap map[string]bool, bootSeq []*eos.Actio
 
 	for _, act := range bootSeq {
 		act.SetToServer(true)
-		data, _ := eos.MarshalBinary(act)
+		data, _ := zsw.MarshalBinary(act)
 		key := sha2(data)
 
 		if !seenMap[key] {
@@ -558,14 +558,14 @@ func (b *BIOS) GetContentsCacheRef(filename string) (string, error) {
 	return "", fmt.Errorf("%q not found in target contents", filename)
 }
 
-func ChunkifyActions(actions []*eos.Action) (out [][]*eos.Action) {
-	currentChunk := []*eos.Action{}
+func ChunkifyActions(actions []*zsw.Action) (out [][]*zsw.Action) {
+	currentChunk := []*zsw.Action{}
 	for _, act := range actions {
 		if act == nil {
 			if len(currentChunk) != 0 {
 				out = append(out, currentChunk)
 			}
-			currentChunk = []*eos.Action{}
+			currentChunk = []*zsw.Action{}
 		} else {
 			currentChunk = append(currentChunk, act)
 		}
@@ -576,14 +576,14 @@ func ChunkifyActions(actions []*eos.Action) (out [][]*eos.Action) {
 	return
 }
 
-func accountVariation(acct eos.AccountName, variation int) eos.AccountName {
+func accountVariation(acct zsw.AccountName, variation int) zsw.AccountName {
 	name := string(acct)
 	if len(name) > 11 {
 		name = name[:11]
 	}
 	variedName := name + string([]byte{'a' + byte(variation-1)})
 
-	return eos.AccountName(variedName)
+	return zsw.AccountName(variedName)
 }
 
 func readPrivKeyFromFile(filename string) (*ecc.PrivateKey, error) {

@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	eos "github.com/eoscanada/eos-go"
+	zsw "github.com/zhongshuwen/zswchain-go"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +23,7 @@ var msigStatusCmd = &cobra.Command{
 
 		response, err := api.GetTableRows(
 			context.Background(),
-			eos.GetTableRowsRequest{
+			zsw.GetTableRowsRequest{
 				Code:       "eosio.msig",
 				Scope:      string(proposer),
 				Table:      "approvals",

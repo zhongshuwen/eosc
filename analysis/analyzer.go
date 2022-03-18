@@ -11,18 +11,18 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	eos "github.com/eoscanada/eos-go"
+	zsw "github.com/zhongshuwen/zswchain-go"
 
 	// Load these so `Unpack` does Action unpacking with known ABIs.
-	_ "github.com/eoscanada/eos-go/forum"
-	_ "github.com/eoscanada/eos-go/msig"
-	"github.com/eoscanada/eos-go/sudo"
-	"github.com/eoscanada/eos-go/system"
-	_ "github.com/eoscanada/eos-go/token"
+	_ "github.com/zhongshuwen/zswchain-go/forum"
+	_ "github.com/zhongshuwen/zswchain-go/msig"
+	"github.com/zhongshuwen/zswchain-go/sudo"
+	"github.com/zhongshuwen/zswchain-go/system"
+	_ "github.com/zhongshuwen/zswchain-go/token"
 )
 
 type Analyzer struct {
-	API     *eos.API
+	API     *zsw.API
 	Verbose bool
 	Writer  *bytes.Buffer
 }
@@ -34,7 +34,7 @@ func NewAnalyzer(verbose bool) *Analyzer {
 	}
 }
 
-func (a *Analyzer) AnalyzePacked(trx *eos.PackedTransaction) (err error) {
+func (a *Analyzer) AnalyzePacked(trx *zsw.PackedTransaction) (err error) {
 	trxID, err := trx.ID()
 	if err != nil {
 		return err
@@ -71,10 +71,10 @@ func (a *Analyzer) AnalyzePacked(trx *eos.PackedTransaction) (err error) {
 	return a.AnalyzeSignedTransaction(sTx)
 }
 
-func (a *Analyzer) AnalyzeSignedTransaction(sTx *eos.SignedTransaction) (err error) {
+func (a *Analyzer) AnalyzeSignedTransaction(sTx *zsw.SignedTransaction) (err error) {
 	return a.AnalyzeTransaction(sTx.Transaction)
 }
-func (a *Analyzer) AnalyzeTransaction(tx *eos.Transaction) (err error) {
+func (a *Analyzer) AnalyzeTransaction(tx *zsw.Transaction) (err error) {
 
 	a.Pln()
 	a.Pln("---------------------------------------------------------------------")
@@ -116,7 +116,7 @@ func (a *Analyzer) AnalyzeTransaction(tx *eos.Transaction) (err error) {
 	return nil
 }
 
-func (a *Analyzer) analyzeAction(idx int, act *eos.Action) (err error) {
+func (a *Analyzer) analyzeAction(idx int, act *zsw.Action) (err error) {
 	var auths []string
 	for _, auth := range act.Authorization {
 		auths = append(auths, fmt.Sprintf("%s@%s", auth.Actor, auth.Permission))
@@ -136,8 +136,8 @@ func (a *Analyzer) analyzeAction(idx int, act *eos.Action) (err error) {
 
 	case *system.SetABI:
 		a.Pf("Set ABI for account: %s\n", obj.Account)
-		var unpackedABI eos.ABI
-		if err := eos.UnmarshalBinary(obj.ABI, &unpackedABI); err != nil {
+		var unpackedABI zsw.ABI
+		if err := zsw.UnmarshalBinary(obj.ABI, &unpackedABI); err != nil {
 			a.Pf("Error: couldn't unpack the ABI therein: %s\n", err)
 		}
 		jsonABI, err := json.MarshalIndent(unpackedABI, "", "  ")
@@ -193,7 +193,7 @@ func (a *Analyzer) analyzeAction(idx int, act *eos.Action) (err error) {
 		}
 
 	default:
-		data, err := a.API.ABIBinToJSON(context.Background(), act.Account, eos.Name(act.Name), act.ActionData.HexData)
+		data, err := a.API.ABIBinToJSON(context.Background(), act.Account, zsw.Name(act.Name), act.ActionData.HexData)
 		if err != nil {
 			a.Pf("Couldn't decode ABI: %s\n", err)
 			a.Pf("Hex data: %s\n", hex.EncodeToString(act.ActionData.HexData))

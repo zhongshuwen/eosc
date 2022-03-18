@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	eos "github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/ecc"
+	zsw "github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/ecc"
 )
 
 // Vault represents an `eosc` wallet.  It contains the encrypted
@@ -21,7 +21,7 @@ type Vault struct {
 	SecretBoxWrap       string `json:"secretbox_wrap"`
 	SecretBoxCiphertext string `json:"secretbox_ciphertext"`
 
-	KeyBag *eos.KeyBag `json:"-"`
+	KeyBag *zsw.KeyBag `json:"-"`
 }
 
 // type ShamirWrapping struct {
@@ -76,7 +76,7 @@ func NewVault() *Vault {
 	return &Vault{
 		Kind:    "eosc-vault-wallet",
 		Version: 1,
-		KeyBag:  eos.NewKeyBag(),
+		KeyBag:  zsw.NewKeyBag(),
 	}
 }
 

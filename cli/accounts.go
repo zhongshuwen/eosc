@@ -8,22 +8,22 @@ import (
 	"strconv"
 	"strings"
 
-	eos "github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/ecc"
+	zsw "github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/ecc"
 )
 
 var reValidAccount = regexp.MustCompile(`[a-z12345]*`)
 
 // ToAccountName converts a eos valid name string (in) into an eos-go
 // AccountName struct
-func ToAccountName(in string) (out eos.AccountName, err error) {
+func ToAccountName(in string) (out zsw.AccountName, err error) {
 	if !reValidAccount.MatchString(in) {
 		err = fmt.Errorf("invalid characters in %q, allowed: 'a' through 'z', and '1', '2', '3', '4', '5'", in)
 		return
 	}
 
-	val, _ := eos.StringToName(in)
-	if eos.NameToString(val) != in {
+	val, _ := zsw.StringToName(in)
+	if zsw.NameToString(val) != in {
 		err = fmt.Errorf("invalid name, 13 characters maximum")
 		return
 	}
@@ -33,29 +33,29 @@ func ToAccountName(in string) (out eos.AccountName, err error) {
 		return
 	}
 
-	return eos.AccountName(in), nil
+	return zsw.AccountName(in), nil
 }
 
 // ToAsset converts a eos valid asset string (in) into an eos-go
 // Asset struct
-func ToAsset(in string) (out eos.Asset, err error) {
-	return eos.NewAsset(in)
+func ToAsset(in string) (out zsw.Asset, err error) {
+	return zsw.NewAsset(in)
 }
 
 // ToName converts a valid eos name string (in) into an eos-go
 // Name struct
-func ToName(in string) (out eos.Name, err error) {
+func ToName(in string) (out zsw.Name, err error) {
 	name, err := ToAccountName(in)
 	if err != nil {
 		return
 	}
-	return eos.Name(name), nil
+	return zsw.Name(name), nil
 }
 
 var shortFormTopLevelRE = regexp.MustCompile(`((\d{1,3})\s*=\s*)?(.*)`)
 var shortFormKeyOrAccountRE = regexp.MustCompile(`\s*(([A-Za-z0-9]{48,64})|(([a-z1-5\.]{1,13})(@([a-z1-5\.]{1,13}))?))(\s*\+\s*(\d{1,3}))?\s*`)
 
-func ParseShortFormAuth(in string) (*eos.Authority, error) {
+func ParseShortFormAuth(in string) (*zsw.Authority, error) {
 
 	match := shortFormTopLevelRE.FindStringSubmatch(in)
 	if match == nil {
@@ -71,11 +71,11 @@ func ParseShortFormAuth(in string) (*eos.Authority, error) {
 		return nil, fmt.Errorf("threshold cannot be 0")
 	}
 
-	auth := &eos.Authority{
+	auth := &zsw.Authority{
 		Threshold: uint32(threshold),
-		Waits:     []eos.WaitWeight{},
-		Accounts:  []eos.PermissionLevelWeight{},
-		Keys:      []eos.KeyWeight{},
+		Waits:     []zsw.WaitWeight{},
+		Accounts:  []zsw.PermissionLevelWeight{},
+		Keys:      []zsw.KeyWeight{},
 	}
 
 	rest := match[3]
@@ -103,7 +103,7 @@ func ParseShortFormAuth(in string) (*eos.Authority, error) {
 				return nil, fmt.Errorf("invalid key %q: %w", key, err)
 			}
 
-			auth.Keys = append(auth.Keys, eos.KeyWeight{
+			auth.Keys = append(auth.Keys, zsw.KeyWeight{
 				PublicKey: pubKey,
 				Weight:    newWeight,
 			})
@@ -122,10 +122,10 @@ func ParseShortFormAuth(in string) (*eos.Authority, error) {
 				return nil, fmt.Errorf("invalid permission name encoding %q", permission)
 			}
 
-			auth.Accounts = append(auth.Accounts, eos.PermissionLevelWeight{
-				Permission: eos.PermissionLevel{
-					Actor:      eos.AccountName(account),
-					Permission: eos.PermissionName(permission),
+			auth.Accounts = append(auth.Accounts, zsw.PermissionLevelWeight{
+				Permission: zsw.PermissionLevel{
+					Actor:      zsw.AccountName(account),
+					Permission: zsw.PermissionName(permission),
 				},
 				Weight: newWeight,
 			})
@@ -143,19 +143,19 @@ func ParseShortFormAuth(in string) (*eos.Authority, error) {
 }
 
 func validateName(in string) bool {
-	val, err := eos.StringToName(in)
+	val, err := zsw.StringToName(in)
 	if err != nil {
 		return false
 	}
-	check := eos.NameToString(val)
+	check := zsw.NameToString(val)
 	return check == in
 }
 
-func isPermissionLess(left, right eos.PermissionLevel) bool {
-	actor1 := eos.MustStringToName(string(left.Actor))
-	actor2 := eos.MustStringToName(string(right.Actor))
-	perm1 := eos.MustStringToName(string(left.Permission))
-	perm2 := eos.MustStringToName(string(right.Permission))
+func isPermissionLess(left, right zsw.PermissionLevel) bool {
+	actor1 := zsw.MustStringToName(string(left.Actor))
+	actor2 := zsw.MustStringToName(string(right.Actor))
+	perm1 := zsw.MustStringToName(string(left.Permission))
+	perm2 := zsw.MustStringToName(string(right.Permission))
 
 	if actor1 < actor2 {
 		return true

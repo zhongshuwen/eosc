@@ -6,8 +6,8 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/forum"
+	"github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/forum"
 	"github.com/pborman/uuid"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -38,7 +38,7 @@ var forumPostCmd = &cobra.Command{
 			metadata = string(metadataBytes)
 		}
 
-		replyTo := eos.AccountName(viper.GetString("forum-post-cmd-reply-to"))
+		replyTo := zsw.AccountName(viper.GetString("forum-post-cmd-reply-to"))
 		if len(replyTo) != 0 {
 			_ = toAccount(string(replyTo), "--reply-to") // only check for errors
 		}

@@ -3,8 +3,8 @@ package cmd
 import (
 	"context"
 
-	eos "github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/system"
+	zsw "github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/system"
 	"github.com/spf13/cobra"
 )
 
@@ -46,11 +46,11 @@ parent, still can sign transfers).
 	Run: func(cmd *cobra.Command, args []string) {
 		account := toAccount(args[0], "your account")
 		code := toAccount(args[1], "code account")
-		var actionName eos.ActionName
+		var actionName zsw.ActionName
 		if args[2] != "" && args[2] != "*" {
-			actionName = eos.ActionName(toName(args[2], "action name"))
+			actionName = zsw.ActionName(toName(args[2], "action name"))
 		}
-		permission := eos.PermissionName(toName(args[3], "permission name"))
+		permission := zsw.PermissionName(toName(args[3], "permission name"))
 
 		api := getAPI()
 

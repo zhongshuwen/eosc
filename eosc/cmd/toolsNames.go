@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	eos "github.com/eoscanada/eos-go"
+	zsw "github.com/zhongshuwen/zswchain-go"
 	"github.com/ryanuber/columnize"
 	"github.com/spf13/cobra"
 )
@@ -55,7 +55,7 @@ func printName(input string) {
 		}
 	}
 
-	fromSymbol, err := eos.StringToSymbol(input)
+	fromSymbol, err := zsw.StringToSymbol(input)
 	if err == nil {
 		symbolUint, err := fromSymbol.ToUint64()
 		if err == nil {
@@ -63,12 +63,12 @@ func printName(input string) {
 		}
 	}
 
-	fromSymbolCode, err := eos.StringToSymbolCode(input)
+	fromSymbolCode, err := zsw.StringToSymbolCode(input)
 	if err == nil {
 		showFrom["symbol_code"] = uint64(fromSymbolCode)
 	}
 
-	fromName, err := eos.StringToName(input)
+	fromName, err := zsw.StringToName(input)
 	if err == nil {
 		showFrom["name"] = fromName
 	}
@@ -111,7 +111,7 @@ func printName(input string) {
 				}
 
 			case "name":
-				row = append(row, eos.NameToString(val))
+				row = append(row, zsw.NameToString(val))
 
 			case "uint64":
 				row = append(row, strconv.FormatUint(val, 10))
@@ -125,10 +125,10 @@ func printName(input string) {
 				row = append(row, show)
 
 			case "symbol":
-				row = append(row, symbOrDash(fmt.Sprintf("%d,%s", uint8(val&0xFF), eos.SymbolCode(val>>8).String())))
+				row = append(row, symbOrDash(fmt.Sprintf("%d,%s", uint8(val&0xFF), zsw.SymbolCode(val>>8).String())))
 
 			case "symbol_code":
-				row = append(row, symbOrDash(eos.SymbolCode(val).String()))
+				row = append(row, symbOrDash(zsw.SymbolCode(val).String()))
 			}
 		}
 		rows = append(rows, "| "+strings.Join(row, " | ")+" |")

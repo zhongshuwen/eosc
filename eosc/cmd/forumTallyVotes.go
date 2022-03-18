@@ -5,8 +5,8 @@ package cmd
 import (
 	"fmt"
 
-	eos "github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/forum"
+	zsw "github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/forum"
 	"github.com/ryanuber/columnize"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -33,7 +33,7 @@ var forumTallyVotesCmd = &cobra.Command{
 			tallyAccounts[vote.vote.Vote] = tallyAccounts[vote.vote.Vote] + 1
 
 		}
-		totalStakedEOS := eos.NewEOSAsset(totalStaked)
+		totalStakedEOS := zsw.NewEOSAsset(totalStaked)
 
 		fmt.Printf("Vote tally for proposal %q:\n", proposalName)
 		fmt.Printf("* %d accounts voted\n", len(votes))
@@ -45,17 +45,17 @@ var forumTallyVotesCmd = &cobra.Command{
 		}
 		for k, stakedForVote := range tallyStaked {
 			accountsForVote := tallyAccounts[k]
-			output = append(output, fmt.Sprintf("%d | %d | %s", k, accountsForVote, eos.NewEOSAsset(stakedForVote).String()))
+			output = append(output, fmt.Sprintf("%d | %d | %s", k, accountsForVote, zsw.NewEOSAsset(stakedForVote).String()))
 		}
 		fmt.Println(columnize.SimpleFormat(output))
 	},
 }
 
-func getForumVotesRows(api *eos.API, contract eos.AccountName, proposalName eos.Name) (out []*forumVoteEntry, err error) {
+func getForumVotesRows(api *zsw.API, contract zsw.AccountName, proposalName zsw.Name) (out []*forumVoteEntry, err error) {
 	// lowerBound := "first"
 	// for {
 	// 	// TODO: Optimize by querying the secondary index..
-	// 	resp, err := api.GetTableRows(eos.GetTableRowsRequest{
+	// 	resp, err := api.GetTableRows(zsw.GetTableRowsRequest{
 	// 		Code:       string(contract),
 	// 		Scope:      string(contract),
 	// 		Table:      string("vote"),
@@ -96,7 +96,7 @@ func getForumVotesRows(api *eos.API, contract eos.AccountName, proposalName eos.
 
 type forumVoteEntry struct {
 	vote    *forum.Vote
-	account *eos.AccountResp
+	account *zsw.AccountResp
 }
 
 func init() {

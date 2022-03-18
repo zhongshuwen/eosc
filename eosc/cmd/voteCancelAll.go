@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/system"
+	"github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/system"
 	"github.com/spf13/cobra"
 )
 
@@ -18,8 +18,8 @@ var voteCancelAllCmd = &cobra.Command{
 
 		voterName := toAccount(args[0], "voter name")
 
-		noProxy := eos.AccountName("")
-		var noVotes []eos.AccountName
+		noProxy := zsw.AccountName("")
+		var noVotes []zsw.AccountName
 		pushEOSCActions(context.Background(), api,
 			system.NewVoteProducer(
 				voterName,

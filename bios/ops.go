@@ -6,15 +6,15 @@ import (
 	"fmt"
 	"reflect"
 
-	eos "github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/ecc"
-	"github.com/eoscanada/eos-go/system"
-	"github.com/eoscanada/eos-go/token"
-	"github.com/eoscanada/eosc/bios/unregd"
+	zsw "github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/zswchain-go/ecc"
+	"github.com/zhongshuwen/zswchain-go/system"
+	"github.com/zhongshuwen/zswchain-go/token"
+	"github.com/zhongshuwen/eosc/bios/unregd"
 )
 
 type Operation interface {
-	Actions(b *BIOS) ([]*eos.Action, error)
+	Actions(b *BIOS) ([]*zsw.Action, error)
 }
 
 var operationsRegistry = map[string]Operation{
@@ -82,11 +82,11 @@ func (o *OperationType) UnmarshalJSON(data []byte) error {
 //
 
 type OpSetCode struct {
-	Account         eos.AccountName
+	Account         zsw.AccountName
 	ContractNameRef string `json:"contract_name_ref"`
 }
 
-func (op *OpSetCode) Actions(b *BIOS) (out []*eos.Action, err error) {
+func (op *OpSetCode) Actions(b *BIOS) (out []*zsw.Action, err error) {
 	wasmFileRef, err := b.GetContentsCacheRef(fmt.Sprintf("%s.wasm", op.ContractNameRef))
 	if err != nil {
 		return nil, err
@@ -114,19 +114,19 @@ type OpSetRAM struct {
 	MaxRAMSize uint64 `json:"max_ram_size"`
 }
 
-func (op *OpSetRAM) Actions(b *BIOS) (out []*eos.Action, err error) {
+func (op *OpSetRAM) Actions(b *BIOS) (out []*zsw.Action, err error) {
 	return append(out, system.NewSetRAM(op.MaxRAMSize)), nil
 }
 
 //
 
 type OpNewAccount struct {
-	Creator    eos.AccountName
-	NewAccount eos.AccountName `json:"new_account"`
+	Creator    zsw.AccountName
+	NewAccount zsw.AccountName `json:"new_account"`
 	Pubkey     string
 }
 
-func (op *OpNewAccount) Actions(b *BIOS) (out []*eos.Action, err error) {
+func (op *OpNewAccount) Actions(b *BIOS) (out []*zsw.Action, err error) {
 	pubKey := b.EphemeralPublicKey
 
 	if op.Pubkey != "ephemeral" {
@@ -140,12 +140,12 @@ func (op *OpNewAccount) Actions(b *BIOS) (out []*eos.Action, err error) {
 }
 
 type OpCreateVoters struct {
-	Creator eos.AccountName
+	Creator zsw.AccountName
 	Pubkey  string
 	Count   int
 }
 
-func (op *OpCreateVoters) Actions(b *BIOS) (out []*eos.Action, err error) {
+func (op *OpCreateVoters) Actions(b *BIOS) (out []*zsw.Action, err error) {
 	pubKey := b.EphemeralPublicKey
 
 	if op.Pubkey != "ephemeral" {
@@ -156,12 +156,12 @@ func (op *OpCreateVoters) Actions(b *BIOS) (out []*eos.Action, err error) {
 	}
 
 	for i := 0; i < op.Count; i++ {
-		voterName := eos.AccountName(voterName(i))
+		voterName := zsw.AccountName(voterName(i))
 		fmt.Println("Creating voter: ", voterName)
 		out = append(out, system.NewNewAccount(op.Creator, voterName, pubKey))
-		out = append(out, token.NewTransfer(op.Creator, voterName, eos.NewEOSAsset(1000000000), ""))
+		out = append(out, token.NewTransfer(op.Creator, voterName, zsw.NewEOSAsset(1000000000), ""))
 		out = append(out, system.NewBuyRAMBytes(AN("eosio"), voterName, 8192)) // 8kb gift !
-		out = append(out, system.NewDelegateBW(AN("eosio"), voterName, eos.NewEOSAsset(10000), eos.NewEOSAsset(10000), true))
+		out = append(out, system.NewDelegateBW(AN("eosio"), voterName, zsw.NewEOSAsset(10000), zsw.NewEOSAsset(10000), true))
 
 	}
 
@@ -176,21 +176,21 @@ func voterName(index int) string {
 }
 
 type OpSetPriv struct {
-	Account eos.AccountName
+	Account zsw.AccountName
 }
 
-func (op *OpSetPriv) Actions(b *BIOS) (out []*eos.Action, err error) {
+func (op *OpSetPriv) Actions(b *BIOS) (out []*zsw.Action, err error) {
 	return append(out, system.NewSetPriv(op.Account)), nil
 }
 
 //
 
 type OpCreateToken struct {
-	Account eos.AccountName `json:"account"`
-	Amount  eos.Asset       `json:"amount"`
+	Account zsw.AccountName `json:"account"`
+	Amount  zsw.Asset       `json:"amount"`
 }
 
-func (op *OpCreateToken) Actions(b *BIOS) (out []*eos.Action, err error) {
+func (op *OpCreateToken) Actions(b *BIOS) (out []*zsw.Action, err error) {
 	act := token.NewCreate(op.Account, op.Amount)
 	return append(out, act), nil
 }
@@ -198,12 +198,12 @@ func (op *OpCreateToken) Actions(b *BIOS) (out []*eos.Action, err error) {
 //
 
 type OpIssueToken struct {
-	Account eos.AccountName
-	Amount  eos.Asset
+	Account zsw.AccountName
+	Amount  zsw.Asset
 	Memo    string
 }
 
-func (op *OpIssueToken) Actions(b *BIOS) (out []*eos.Action, err error) {
+func (op *OpIssueToken) Actions(b *BIOS) (out []*zsw.Action, err error) {
 	act := token.NewIssue(op.Account, op.Amount, op.Memo)
 	return append(out, act), nil
 }
@@ -211,13 +211,13 @@ func (op *OpIssueToken) Actions(b *BIOS) (out []*eos.Action, err error) {
 //
 
 type OpTransferToken struct {
-	From     eos.AccountName
-	To       eos.AccountName
-	Quantity eos.Asset
+	From     zsw.AccountName
+	To       zsw.AccountName
+	Quantity zsw.Asset
 	Memo     string
 }
 
-func (op *OpTransferToken) Actions(b *BIOS) (out []*eos.Action, err error) {
+func (op *OpTransferToken) Actions(b *BIOS) (out []*zsw.Action, err error) {
 	act := token.NewTransfer(op.From, op.To, op.Quantity, op.Memo)
 	return append(out, act), nil
 }
@@ -229,7 +229,7 @@ type OpSnapshotCreateAccounts struct {
 	TestnetTruncateSnapshot int    `json:"TESTNET_TRUNCATE_SNAPSHOT"`
 }
 
-func (op *OpSnapshotCreateAccounts) Actions(b *BIOS) (out []*eos.Action, err error) {
+func (op *OpSnapshotCreateAccounts) Actions(b *BIOS) (out []*zsw.Action, err error) {
 	snapshotFile, err := b.GetContentsCacheRef("snapshot.csv")
 	if err != nil {
 		return nil, err
@@ -281,7 +281,7 @@ func (op *OpSnapshotCreateAccounts) Actions(b *BIOS) (out []*eos.Action, err err
 	return
 }
 
-func splitSnapshotStakes(balance eos.Asset) (cpu, net, xfer eos.Asset) {
+func splitSnapshotStakes(balance zsw.Asset) (cpu, net, xfer zsw.Asset) {
 	if balance.Amount < 5000 {
 		return
 	}
@@ -290,10 +290,10 @@ func splitSnapshotStakes(balance eos.Asset) (cpu, net, xfer eos.Asset) {
 	// some 10 EOS unstaked
 	// the rest split between the two
 
-	cpu = eos.NewEOSAsset(2500)
-	net = eos.NewEOSAsset(2500)
+	cpu = zsw.NewEOSAsset(2500)
+	net = zsw.NewEOSAsset(2500)
 
-	remainder := eos.NewEOSAsset(int64(balance.Amount - cpu.Amount - net.Amount))
+	remainder := zsw.NewEOSAsset(int64(balance.Amount - cpu.Amount - net.Amount))
 
 	if remainder.Amount <= 100000 /* 10.0 EOS */ {
 		return cpu, net, remainder
@@ -305,7 +305,7 @@ func splitSnapshotStakes(balance eos.Asset) (cpu, net, xfer eos.Asset) {
 	cpu.Amount += firstHalf
 	net.Amount += remainder.Amount - firstHalf
 
-	return cpu, net, eos.NewEOSAsset(100000)
+	return cpu, net, zsw.NewEOSAsset(100000)
 }
 
 //
@@ -314,7 +314,7 @@ type OpInjectUnregdSnapshot struct {
 	TestnetTruncateSnapshot int `json:"TESTNET_TRUNCATE_SNAPSHOT"`
 }
 
-func (op *OpInjectUnregdSnapshot) Actions(b *BIOS) (out []*eos.Action, err error) {
+func (op *OpInjectUnregdSnapshot) Actions(b *BIOS) (out []*zsw.Action, err error) {
 	snapshotFile, err := b.GetContentsCacheRef("snapshot_unregistered.csv")
 	if err != nil {
 		return nil, err
@@ -357,7 +357,7 @@ func (op *OpInjectUnregdSnapshot) Actions(b *BIOS) (out []*eos.Action, err error
 //
 
 type producerKeyString struct {
-	ProducerName          eos.AccountName `json:"producer_name"`
+	ProducerName          zsw.AccountName `json:"producer_name"`
 	BlockSigningKeyString string          `json:"block_signing_key"`
 }
 
@@ -365,7 +365,7 @@ type OpSetProds struct {
 	Prods []producerKeyString
 }
 
-func (op *OpSetProds) Actions(b *BIOS) (out []*eos.Action, err error) {
+func (op *OpSetProds) Actions(b *BIOS) (out []*zsw.Action, err error) {
 
 	var prodKeys []system.ProducerKey
 
@@ -405,11 +405,11 @@ func (op *OpSetProds) Actions(b *BIOS) (out []*eos.Action, err error) {
 //
 
 type OpResignAccounts struct {
-	Accounts            []eos.AccountName
+	Accounts            []zsw.AccountName
 	TestnetKeepAccounts bool `json:"TESTNET_KEEP_ACCOUNTS"`
 }
 
-func (op *OpResignAccounts) Actions(b *BIOS) (out []*eos.Action, err error) {
+func (op *OpResignAccounts) Actions(b *BIOS) (out []*zsw.Action, err error) {
 	if op.TestnetKeepAccounts {
 		b.Log.Debugln("DEBUG: Keeping system accounts around, for testing purposes.")
 		return
@@ -426,11 +426,11 @@ func (op *OpResignAccounts) Actions(b *BIOS) (out []*eos.Action, err error) {
 		}
 
 		out = append(out,
-			system.NewUpdateAuth(acct, PN("active"), PN("owner"), eos.Authority{
+			system.NewUpdateAuth(acct, PN("active"), PN("owner"), zsw.Authority{
 				Threshold: 1,
-				Accounts: []eos.PermissionLevelWeight{
-					eos.PermissionLevelWeight{
-						Permission: eos.PermissionLevel{
+				Accounts: []zsw.PermissionLevelWeight{
+					zsw.PermissionLevelWeight{
+						Permission: zsw.PermissionLevel{
 							Actor:      AN("eosio"),
 							Permission: PN("active"),
 						},
@@ -438,11 +438,11 @@ func (op *OpResignAccounts) Actions(b *BIOS) (out []*eos.Action, err error) {
 					},
 				},
 			}, PN("active")),
-			system.NewUpdateAuth(acct, PN("owner"), PN(""), eos.Authority{
+			system.NewUpdateAuth(acct, PN("owner"), PN(""), zsw.Authority{
 				Threshold: 1,
-				Accounts: []eos.PermissionLevelWeight{
-					eos.PermissionLevelWeight{
-						Permission: eos.PermissionLevel{
+				Accounts: []zsw.PermissionLevelWeight{
+					zsw.PermissionLevelWeight{
+						Permission: zsw.PermissionLevel{
 							Actor:      AN("eosio"),
 							Permission: PN("active"),
 						},
@@ -455,11 +455,11 @@ func (op *OpResignAccounts) Actions(b *BIOS) (out []*eos.Action, err error) {
 
 	if eosioPresent {
 		out = append(out,
-			system.NewUpdateAuth(systemAccount, PN("active"), PN("owner"), eos.Authority{
+			system.NewUpdateAuth(systemAccount, PN("active"), PN("owner"), zsw.Authority{
 				Threshold: 1,
-				Accounts: []eos.PermissionLevelWeight{
-					eos.PermissionLevelWeight{
-						Permission: eos.PermissionLevel{
+				Accounts: []zsw.PermissionLevelWeight{
+					zsw.PermissionLevelWeight{
+						Permission: zsw.PermissionLevel{
 							Actor:      prodsAccount,
 							Permission: PN("active"),
 						},
@@ -467,11 +467,11 @@ func (op *OpResignAccounts) Actions(b *BIOS) (out []*eos.Action, err error) {
 					},
 				},
 			}, PN("active")),
-			system.NewUpdateAuth(systemAccount, PN("owner"), PN(""), eos.Authority{
+			system.NewUpdateAuth(systemAccount, PN("owner"), PN(""), zsw.Authority{
 				Threshold: 1,
-				Accounts: []eos.PermissionLevelWeight{
-					eos.PermissionLevelWeight{
-						Permission: eos.PermissionLevel{
+				Accounts: []zsw.PermissionLevelWeight{
+					zsw.PermissionLevelWeight{
+						Permission: zsw.PermissionLevel{
 							Actor:      prodsAccount,
 							Permission: PN("active"),
 						},

@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"os"
 
-	eos "github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eosc/analysis"
+	zsw "github.com/zhongshuwen/zswchain-go"
+	"github.com/zhongshuwen/eosc/analysis"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -25,7 +25,7 @@ var msigReviewCmd = &cobra.Command{
 
 		response, err := api.GetTableRows(
 			context.Background(),
-			eos.GetTableRowsRequest{
+			zsw.GetTableRowsRequest{
 				Code:       "eosio.msig",
 				Scope:      string(proposer),
 				Table:      "proposal",
@@ -37,16 +37,16 @@ var msigReviewCmd = &cobra.Command{
 		errorCheck("get table row", err)
 
 		var proposals []struct {
-			ProposalName eos.Name     `json:"proposal_name"`
-			Transaction  eos.HexBytes `json:"packed_transaction"`
+			ProposalName zsw.Name     `json:"proposal_name"`
+			Transaction  zsw.HexBytes `json:"packed_transaction"`
 		}
 		err = response.JSONToStructs(&proposals)
 		errorCheck("reading proposed proposals", err)
 
-		var tx *eos.Transaction
+		var tx *zsw.Transaction
 		for _, proposalRow := range proposals {
 			if proposalRow.ProposalName == proposalName {
-				err := eos.UnmarshalBinary(proposalRow.Transaction, &tx)
+				err := zsw.UnmarshalBinary(proposalRow.Transaction, &tx)
 				errorCheck("unmarshalling packed transaction", err)
 
 				ana := analysis.NewAnalyzer(viper.GetBool("multisig-review-cmd-dump"))

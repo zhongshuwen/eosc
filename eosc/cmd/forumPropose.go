@@ -7,9 +7,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/eoscanada/eos-go"
+	"github.com/zhongshuwen/zswchain-go"
 
-	"github.com/eoscanada/eos-go/forum"
+	"github.com/zhongshuwen/zswchain-go/forum"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tidwall/sjson"
@@ -27,10 +27,10 @@ var forumProposeCmd = &cobra.Command{
 		title := args[2]
 
 		expiresAtStr := args[3]
-		var expiresAt eos.JSONTime
+		var expiresAt zsw.JSONTime
 		var err error
 		if expiresAtStr != "" {
-			expiresAt, err = eos.ParseJSONTime(expiresAtStr)
+			expiresAt, err = zsw.ParseJSONTime(expiresAtStr)
 			errorCheck("no valid proposal expiration date provided. Must be set as ISO-8601 format. Maximum 6 months in the future.", err)
 		}
 		if expiresAt.Before(time.Now()) {
